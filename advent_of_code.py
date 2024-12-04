@@ -99,4 +99,82 @@ def day_3():
     print(total)
 
 
-day_3()
+def day_4():
+    with open("input", "r") as file:
+        data = file.readlines()
+
+    def print_data(data):
+        for line in data:
+            print(line.replace("\n", ""))
+
+
+    def check_direction(row, col, data, direction_vector):
+        if row + direction_vector[1] * 3 > len(data)-1:
+            return False
+        if row + direction_vector[1] * 3 < 0:
+            return False
+        if col + direction_vector[0] * 3 > len(data[row])-1:
+            return False
+        if col + direction_vector[0] * 3 < 0:
+            return False
+
+        word = [data[row+direction_vector[1]*i][col+direction_vector[0]*i] for i in range(4)]
+
+        if word != ["X", "M", "A", "S"]:
+            return False
+        else:
+            return True
+        
+
+    
+    def check_word(row, col, data):
+        if data[row][col] != "X":
+            return 0
+
+        matches = 0
+        
+        N = (0, 1)
+        NE = (1, 1)
+        E = (1, 0)
+        SE = (1, -1)
+        S = (0, -1)
+        SW = (-1, -1)
+        W = (-1, 0)
+        NW = (-1, 1)
+        for direction in [N,NE,E,SE,S,SW,W,NW]:
+            if check_direction(row,col,data,direction):
+                matches+=1
+        
+        return matches
+
+    total = 0
+
+        
+    for row in range(len(data)):
+        for col in range(len(data[row])):
+            total += check_word(row,col,data)
+
+    print(total)
+
+    def check_square(row, col, data):
+        if data[row][col] not in ["M", "S"]:
+            return False
+        if data[row+1][col+1] != "A":
+            return False
+        if set(["M", "S"]) == set([data[row][col], data[row+2][col+2]]) and set(["M", "S"]) == set([data[row+2][col], data[row][col+2]]):
+            return True
+        
+    
+    total = 0
+
+        
+    for row in range(len(data)-2):
+        for col in range(len(data[row])-2):
+            if check_square(row,col,data):
+                total += 1
+
+    print(total)
+                
+
+
+day_4()
