@@ -177,4 +177,47 @@ def day_4():
                 
 
 
-day_4()
+def day_5():
+    def check_rule(update: list, rule: tuple):
+        try:
+            i1 = update.index(rule[0])
+            i2 = update.index(rule[1])
+        except ValueError:
+            return True
+        else:
+            if i1 < i2:
+                return True
+            else:
+                return False
+
+
+    with open("input", "r") as file:
+        data = file.readlines()
+    rules = [tuple(line.replace("\n", "").split("|")) for line in data if "|" in line]
+    updates = [list(line.replace("\n", "").split(",")) for line in data if "," in line]
+    invalid_updates = []
+    sum_of_middles = 0
+    for update in updates:
+        is_valid = True
+        for rule in rules:
+            if not check_rule(update, rule):
+                is_valid = False
+        if is_valid:
+            sum_of_middles += int(update[(len(update)//2)])
+        else:
+            invalid_updates.append(update)
+
+    print(sum_of_middles)
+
+
+    sum_of_middles = 0
+    for update in invalid_updates:
+        for i in range(len(update)):
+            for rule in rules:
+                if not check_rule(update, rule):
+                    update[update.index(rule[0])], update[update.index(rule[1])] =  update[update.index(rule[1])], update[update.index(rule[0])]
+        
+        sum_of_middles += int(update[(len(update)//2)])
+    print(sum_of_middles)
+
+day_5()
