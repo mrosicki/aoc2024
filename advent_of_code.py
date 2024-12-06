@@ -220,4 +220,94 @@ def day_5():
         sum_of_middles += int(update[(len(update)//2)])
     print(sum_of_middles)
 
-day_5()
+def day_6():
+    import os
+    with open("input", "r") as file:
+        data = file.readlines()
+
+    original_board = [[cell for cell in line] for line in data]
+
+    def copy_board(board):
+        copy = [row.copy() for row in board]
+        return copy
+    
+
+
+    def print_board(board):
+        for row in board:
+            for cell in row:
+                print(cell, end="")
+
+    
+    def get_next_guard_step(data, guard_row, guard_col):
+        directions_dict = {
+            # guard: (row_diff, col_diff)
+            "^": (-1, 0),
+            ">": (0, 1),
+            "v": (1, 0),
+            "<": (0,-1),
+        }
+        guard_directions = ["^",">","v","<"]
+        guard = data[guard_row][guard_col]
+        # return None -> guard leaves map
+        if 0 > guard_row + directions_dict[guard][0] or guard_row + directions_dict[guard][0] > len(data)-1:
+            return None
+        if 0 > guard_col + directions_dict[guard][1] or guard_col + directions_dict[guard][1]> len(data[guard_row])-1:
+            return None
+        # return string -> guard rotates
+        if data[guard_row + directions_dict[guard][0]][guard_col + directions_dict[guard][1]] == "#":
+            return guard_directions[((guard_directions.index(guard)+1) % 4)]
+        return (guard_row + directions_dict[guard][0], guard_col + directions_dict[guard][1])
+
+    initial_guard_row = [i for i, line in enumerate(data) if "^" in line][0]
+    initial_guard_col = data[initial_guard_row].index("^")           
+
+        
+
+    guard_row = initial_guard_row
+    guard_col = initial_guard_col
+
+    prev_move = None
+    original_cell_content = None
+    board = copy_board(original_board)
+
+    while get_next_guard_step(board, guard_row, guard_col) is not None:
+        next_step = get_next_guard_step(board, guard_row, guard_col)
+        if isinstance(next_step, str):
+            board[guard_row][guard_col] = next_step
+            prev_move = "rotate"
+        if isinstance(next_step, tuple):
+            if prev_move == "rotate":
+                step_symbol = "+"
+            else:
+                step_symbol = "|" if board[guard_row][guard_col] in ["^", "v"] else "-"
+                if set(["|", "-"]) == set([step_symbol, original_cell_content]):
+                    step_symbol = "+"
+            original_cell_content = board[next_step[0]][next_step[1]]
+            board[next_step[0]][next_step[1]] = board[guard_row][guard_col]
+
+            board[guard_row][guard_col] = step_symbol
+            guard_row, guard_col = next_step[0], next_step[1]
+            prev_move = "move"
+
+    
+    cells_visited = 0
+    for row in board:
+        for cell in row:
+            if cell in ["|", "+", "-", "v", "^", "<", ">"]:
+                cells_visited +=1
+    
+    print(cells_visited)
+
+
+    for row in range(len(original_board)):
+        for col in range(len(original_board[row])-1):
+            board = copy_board(original_board)
+            if board[row][col] == "#" or (row == initial_guard_row and col == initial_guard_col):
+                continue
+            else:
+                board[row][col] = "#"
+
+        
+
+day_6()
