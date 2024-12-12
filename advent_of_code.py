@@ -299,15 +299,101 @@ def day_6():
     
     print(cells_visited)
 
+    # abhorrent performance but I can't think of a smarter way to do this
 
+    num_of_cells = len(original_board) * (len(original_board[0])-1)
+
+
+    valid_boards = 0
+    board_no = 0
     for row in range(len(original_board)):
         for col in range(len(original_board[row])-1):
+            board_no +=1
+            print(f"{board_no}/{num_of_cells}")
+            cycle = 0
             board = copy_board(original_board)
+
             if board[row][col] == "#" or (row == initial_guard_row and col == initial_guard_col):
                 continue
             else:
                 board[row][col] = "#"
+            initial_guard_row = [i for i, line in enumerate(data) if "^" in line][0]
+            initial_guard_col = data[initial_guard_row].index("^")           
 
+                
+
+            guard_row = initial_guard_row
+            guard_col = initial_guard_col
+
+            prev_move = None
+            original_cell_content = None
+
+            while get_next_guard_step(board, guard_row, guard_col) is not None:
+                cycle+=1
+                next_step = get_next_guard_step(board, guard_row, guard_col)
+                if isinstance(next_step, str):
+                    board[guard_row][guard_col] = next_step
+                    prev_move = "rotate"
+                if isinstance(next_step, tuple):
+                    if prev_move == "rotate":
+                        step_symbol = "+"
+                    else:
+                        step_symbol = "|" if board[guard_row][guard_col] in ["^", "v"] else "-"
+                        if set(["|", "-"]) == set([step_symbol, original_cell_content]):
+                            step_symbol = "+"
+                    original_cell_content = board[next_step[0]][next_step[1]]
+                    board[next_step[0]][next_step[1]] = board[guard_row][guard_col]
+
+                    board[guard_row][guard_col] = step_symbol
+                    guard_row, guard_col = next_step[0], next_step[1]
+                    prev_move = "move"
+
+
+                
+                if cycle > num_of_cells:
+                    print_board(board)
+                    print()
+                    valid_boards+=1
+                    break
+    print(valid_boards)
+            
+
+
+
+def day_7():
+    from itertools import product
+    with open("input","r") as f:
+        data = f.readlines()
+
+    add = lambda a,b: a+b
+    mul = lambda a,b: a*b
+    con = lambda a,b: int(str(a)+str(b))
+
+    total = 0
+    for line in data:
+        test_value, inputs = line.replace("\n", "").split(":")
+        test_value = int(test_value)
+        inputs = [int(value) for value in inputs.split(" ") if value]
+        operations = [add, mul, con]
+        num_of_operations = (len(inputs)-1)
+        operator_combos = list(product(*[operations for i in range(num_of_operations)]))
+        value_possible = False
+        for combo in operator_combos:
+            t = inputs[0]
+            for i, operation in enumerate(combo):
+                t = operation(t, inputs[i+1])
+            if t == test_value:
+                value_possible = True
+                break
         
+        if value_possible:
+            total += t
+
+    print(total)
+        
+
+def day_9():
+    with open("input", "r") as file:
+        data = file.readlines()
 
 day_6()
